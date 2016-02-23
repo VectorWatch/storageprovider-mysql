@@ -1,0 +1,27 @@
+{
+  "name": "vectorwatch-storageprovider-mysql",
+  "version": "1.0.0",
+  "description": "A VectorWatch Storage Provider that stores data in MySQL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VectorWatch/storageprovider-mysql.git"
+  },
+  "keywords": [
+    "vectorwatch"
+  ],
+  "author": "alin.roman@zitec.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/VectorWatch/storageprovider-mysql/issues"
+  },
+  "homepage": "https://github.com/VectorWatch/storageprovider-mysql#readme",
+  "dependencies": {
+    "bluebird": "^3.3.1",
+    "mysql": "^2.10.2",
+    "vectorwatch-storageprovider-abstract": "^1.0.0"
+  }
+}
