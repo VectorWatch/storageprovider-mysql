@@ -22,6 +22,10 @@ MySQLStorageProvider.prototype.getAuthTokensByCredentialsKeyAsync = function(cre
         credentialsKey
     ]).then(function(records) {
         return records && records[0] && records[0].authTokens;
+    }).then(function(authTokensString) {
+        if (authTokensString) {
+            return JSON.parse(authTokensString);
+        }
     });
 };
 
@@ -32,6 +36,10 @@ MySQLStorageProvider.prototype.getAuthTokensByChannelLabelAsync = function(chann
         [channelLabel]
     ).then(function(records) {
         return records && records[0] && records[0].authTokens;
+    }).then(function(authTokensString) {
+        if (authTokensString) {
+            return JSON.parse(authTokensString);
+        }
     });
 };
 
