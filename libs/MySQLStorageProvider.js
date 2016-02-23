@@ -51,7 +51,7 @@ MySQLStorageProvider.prototype.storeUserSettingsAsync = function(channelLabel, u
     );
 };
 
-MySQLStorageProvider.prototype.removeUserSettingAsync = function(channelLabel) {
+MySQLStorageProvider.prototype.removeUserSettingsAsync = function(channelLabel) {
     var _this = this;
 
     return this.connection.queryAsync('UPDATE UserSettings SET count = count - 1 WHERE channelLabel = ?', [
