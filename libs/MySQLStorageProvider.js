@@ -1,22 +1,33 @@
 var Promise = require('bluebird');
 var mysql = require('mysql');
 var util = require('util');
-var AbstractStorageProvider = require('vectorwatch-storageprovider-abstract');
+var StorageProviderAbstract = require('vectorwatch-storageprovider-abstract');
 
+/**
+ * @param options {Object}
+ * @constructor
+ * @augments StorageProviderAbstract
+ */
 function MySQLStorageProvider(options) {
-    AbstractStorageProvider.call(this);
+    StorageProviderAbstract.call(this);
 
     this.connection = mysql.createPool(options);
     this.connection.queryAsync = Promise.promisify(this.connection.query);
 }
-util.inherits(MySQLStorageProvider, AbstractStorageProvider);
+util.inherits(MySQLStorageProvider, StorageProviderAbstract);
 
+/**
+ * @inheritdoc
+ */
 MySQLStorageProvider.prototype.storeAuthTokensAsync = function(credentialsKey, authTokens) {
     return this.connection.queryAsync('INSERT IGNORE INTO Auth (credentialsKey, authTokens) VALUES (?, ?)', [
         credentialsKey, JSON.stringify(authTokens)
     ]);
 };
 
+/**
+ * @inheritdoc
+ */
 MySQLStorageProvider.prototype.getAuthTokensByCredentialsKeyAsync = function(credentialsKey) {
     return this.connection.queryAsync('SELECT authTokens FROM Auth WHERE credentialsKey = ?', [
         credentialsKey
@@ -29,6 +40,9 @@ MySQLStorageProvider.prototype.getAuthTokensByCredentialsKeyAsync = function(cre
     });
 };
 
+/**
+ * @inheritdoc
+ */
 MySQLStorageProvider.prototype.getAuthTokensByChannelLabelAsync = function(channelLabel) {
     return this.connection.queryAsync(
         'SELECT Auth.authTokens FROM Auth LEFT JOIN UserSettings ON UserSettings.credentialsKey = Auth.credentialsKey' +
@@ -43,6 +57,9 @@ MySQLStorageProvider.prototype.getAuthTokensByChannelLabelAsync = function(chann
     });
 };
 
+/**
+ * @inheritdoc
+ */
 MySQLStorageProvider.prototype.storeUserSettingsAsync = function(channelLabel, userSettings, credentialsKey) {
     return this.connection.queryAsync(
         'INSERT INTO UserSettings (channelLabel, userSettings, credentialsKey, count) VALUES (?, ?, ?, 1) ON DUPLICATE' +
@@ -51,6 +68,9 @@ MySQLStorageProvider.prototype.storeUserSettingsAsync = function(channelLabel, u
     );
 };
 
+/**
+ * @inheritdoc
+ */
 MySQLStorageProvider.prototype.removeUserSettingsAsync = function(channelLabel) {
     var _this = this;
 
@@ -61,6 +81,9 @@ MySQLStorageProvider.prototype.removeUserSettingsAsync = function(channelLabel) 
     });
 };
 
+/**
+ * @inheritdoc
+ */
 MySQLStorageProvider.prototype.getAllUserSettingsAsync = function() {
     return this.connection.queryAsync(
         'SELECT UserSettings.channelLabel, UserSettings.userSettings, Auth.authTokens FROM UserSettings LEFT JOIN Auth' +
@@ -76,6 +99,9 @@ MySQLStorageProvider.prototype.getAllUserSettingsAsync = function() {
     });
 };
 
+/**
+ * @inheritdoc
+ */
 MySQLStorageProvider.prototype.getUserSettingsAsync = function(channelLabel) {
     return this.connection.queryAsync(
         'SELECT UserSettings.channelLabel, UserSettings.userSettings, Auth.authTokens FROM UserSettings LEFT JOIN Auth' +
