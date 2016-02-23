@@ -20,7 +20,8 @@ util.inherits(MySQLStorageProvider, StorageProviderAbstract);
  * @inheritdoc
  */
 MySQLStorageProvider.prototype.storeAuthTokensAsync = function(credentialsKey, authTokens) {
-    return this.connection.queryAsync('INSERT IGNORE INTO Auth (credentialsKey, authTokens) VALUES (?, ?)', [
+    return this.connection.queryAsync('INSERT INTO Auth (credentialsKey, authTokens) VALUES (?, ?) ON DUPLICATE KEY ' +
+        'UPDATE authTokens = VALUES(authTokens)', [
         credentialsKey, JSON.stringify(authTokens)
     ]);
 };

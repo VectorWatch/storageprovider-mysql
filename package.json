@@ -1,6 +1,6 @@
 {
   "name": "vectorwatch-storageprovider-mysql",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A VectorWatch Storage Provider that stores data in MySQL",
   "main": "index.js",
   "scripts": {
