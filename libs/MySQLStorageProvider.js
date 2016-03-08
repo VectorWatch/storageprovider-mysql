@@ -120,4 +120,74 @@ MySQLStorageProvider.prototype.getUserSettingsAsync = function(channelLabel) {
     });
 };
 
+/**
+ * @inheritdoc
+ */
+MySQLStorageProvider.prototype.storeAppSettingsAsync = function(userKey, userSettings, credentialsKey, ttl) {
+    return this.connection.queryAsync(
+        'INSERT INTO AppSettings (userKey, userSettings, credentialsKey, expiresAt) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND)) ON DUPLICATE' +
+        ' KEY UPDATE expiresAt = VALUES(expiresAt), credentialsKey = VALUES(credentialsKey)',
+        [userKey, JSON.stringify(userSettings), credentialsKey, ttl]
+    );
+};
+
+/**
+ * @inheritdoc
+ */
+MySQLStorageProvider.prototype.removeExpiredAppSettingsAsync = function() {
+    return this.connection.queryAsync(
+        'START TRANSACTION;' +
+        'SELECT AppSettings.userKey, AppSettings.userSettings, Auth.authTokens FROM AppSettings LEFT JOIN Auth' +
+        ' ON Auth.credentialsKey = AppSettings.credentialsKey WHERE AppSettings.expiresAt <= NOW();' +
+        'DELETE FROM AppSettings WHERE expiresAt <= NOW();' +
+        'COMMIT;'
+    ).then(function(records) {
+        records = records || [];
+        records.forEach(function(record) {
+            record.userSettings = JSON.parse(record.userSettings);
+            record.authTokens = JSON.parse(record.authTokens);
+        });
+
+        return records;
+    });
+};
+
+/**
+ * @inheritdoc
+ */
+MySQLStorageProvider.prototype.getAllAppSettingsAsync = function() {
+    return this.connection.queryAsync(
+        'SELECT AppSettings.userKey, AppSettings.userSettings, Auth.authTokens FROM AppSettings LEFT JOIN Auth' +
+        ' ON Auth.credentialsKey = AppSettings.credentialsKey WHERE AppSettings.expiresAt > NOW()'
+    ).then(function(records) {
+        records = records || [];
+        records.forEach(function(record) {
+            record.userSettings = JSON.parse(record.userSettings);
+            record.authTokens = JSON.parse(record.authTokens);
+        });
+
+        return records;
+    });
+};
+
+/**
+ * @inheritdoc
+ */
+MySQLStorageProvider.prototype.getAppSettingsAsync = function(userKey) {
+    return this.connection.queryAsync(
+        'SELECT AppSettings.userKey, AppSettings.userSettings, Auth.authTokens FROM AppSettings LEFT JOIN Auth' +
+        ' ON Auth.credentialsKey = AppSettings.credentialsKey WHERE AppSettings.expiresAt > NOW() AND AppSettings.userKey = ?',
+        [userKey]
+    ).then(function(records) {
+        var record = records && records[0];
+
+        if (record) {
+            record.userSettings = JSON.parse(record.userSettings);
+            record.authTokens = JSON.parse(record.authTokens);
+        }
+
+        return record;
+    });
+};
+
 module.exports = MySQLStorageProvider;
