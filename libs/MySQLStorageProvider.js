@@ -4,14 +4,19 @@ var util = require('util');
 var StorageProviderAbstract = require('vectorwatch-storageprovider-abstract');
 
 /**
- * @param options {Object}
  * @constructor
  * @augments StorageProviderAbstract
  */
-function MySQLStorageProvider(options) {
+function MySQLStorageProvider() {
     StorageProviderAbstract.call(this);
 
-    this.connection = mysql.createPool(options);
+    this.connection = mysql.createPool({
+        connectionLimit: process.env.VECTOR_DB_CONN_LIMIT,
+        host: process.env.VECTOR_DB_HOST,
+        user: process.env.VECTOR_DB_USER,
+        password: process.env.VECTOR_DB_PASS,
+        database: process.env.VECTOR_DB
+    });
     this.connection.queryAsync = Promise.promisify(this.connection.query);
 }
 util.inherits(MySQLStorageProvider, StorageProviderAbstract);
