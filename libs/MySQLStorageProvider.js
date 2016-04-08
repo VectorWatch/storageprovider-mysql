@@ -195,4 +195,18 @@ MySQLStorageProvider.prototype.getAppSettingsAsync = function(userKey) {
     });
 };
 
+/**
+ * For applications that require push
+ */
+
+MySQLStorageProvider.prototype.storeUserKey = function(userKey, authTokens) {
+    return this.connection.queryAsync(
+        'UPDATE Auth SET userKey=? WHERE authTokens=?', [userKey, authTokens]);
+}
+
+MySQLStorageProvider.prototype.getAuthTokensForUserKey = function(userKey) {
+   return this.connection.queryAsync(
+        'SELECT authTokens FROM Auth WHERE userKey=?', userKey);
+}
+
 module.exports = MySQLStorageProvider;
