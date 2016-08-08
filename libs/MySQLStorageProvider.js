@@ -66,12 +66,19 @@ MySQLStorageProvider.prototype.getAuthTokensByChannelLabelAsync = function(chann
 /**
  * @inheritdoc
  */
-MySQLStorageProvider.prototype.storeUserSettingsAsync = function(channelLabel, userSettings, credentialsKey) {
-    return this.connection.queryAsync(
-        'INSERT INTO UserSettings (channelLabel, userSettings, credentialsKey, count) VALUES (?, ?, ?, 1) ON DUPLICATE' +
-        ' KEY UPDATE count = count + 1, credentialsKey = VALUES(credentialsKey)',
-        [channelLabel, JSON.stringify(userSettings), credentialsKey]
-    );
+MySQLStorageProvider.prototype.storeUserSettingsAsync = function(channelLabel, userSettings, credentialsKey, contextualUniqueLabel) {
+    if (contextualUniqueLabel) {
+        userSettings.contextualUniqueLabel = channelLabel;
+        return this.connection.queryAsync(
+            'INSERT INTO UserSettings (channelLabel, userSettings, credentialsKey, count) VALUES (?, ?, ?, 1) ON DUPLICATE' +
+            ' KEY UPDATE count = count + 1, credentialsKey = VALUES(credentialsKey), userSettings = ?',
+            [contextualUniqueLabel, JSON.stringify(userSettings), credentialsKey, JSON.stringify(userSettings)]);
+    } else {
+        return this.connection.queryAsync(
+            'INSERT INTO UserSettings (channelLabel, userSettings, credentialsKey, count) VALUES (?, ?, ?, 1) ON DUPLICATE' +
+            ' KEY UPDATE count = count + 1, credentialsKey = VALUES(credentialsKey)',
+            [channelLabel, JSON.stringify(userSettings), credentialsKey]);
+    }
 };
 
 /**
@@ -205,7 +212,7 @@ MySQLStorageProvider.prototype.storeUserKey = function(userKey, authTokens) {
 }
 
 MySQLStorageProvider.prototype.getAuthTokensForUserKey = function(userKey) {
-   return this.connection.queryAsync(
+    return this.connection.queryAsync(
         'SELECT authTokens FROM Auth WHERE userKey=?', userKey);
 }
 
