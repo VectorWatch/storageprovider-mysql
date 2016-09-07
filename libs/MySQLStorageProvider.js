@@ -92,7 +92,7 @@ MySQLStorageProvider.prototype.removeUserSettingsAsync = function(channelLabel) 
  */
 MySQLStorageProvider.prototype.getAllUserSettingsAsync = function() {
     return this.connection.queryAsync(
-        'SELECT UserSettings.channelLabel, UserSettings.userSettings, Auth.authTokens FROM UserSettings LEFT JOIN Auth' +
+        'SELECT UserSettings.channelLabel, UserSettings.userSettings, Auth.authTokens, Auth.credentialsKey FROM UserSettings LEFT JOIN Auth' +
         ' ON Auth.credentialsKey = UserSettings.credentialsKey'
     ).then(function(records) {
         records = records || [];
